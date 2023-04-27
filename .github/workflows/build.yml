@@ -73,7 +73,7 @@ jobs:
         
     - name: report_processing
       run: |
-        cat ${{ env.IMAGE_NAME }}_report.json | jq '.Results[] | {Type, Class, Target, Vulnerabilities: [.Vulnerabilities[] | {PkgName, VulnerabilityID, Severity, InstalledVersion, FixedVersion, Title, PrimaryURL}]}' > ${{ env.IMAGE_NAME }}_result.json
+        cat ${{ env.IMAGE_NAME }}_report.json | jq -c '.Results[] | {Type, Class, Target, Vulnerabilities: [.Vulnerabilities[] | {PkgName, VulnerabilityID, Severity, InstalledVersion, FixedVersion, Title, PrimaryURL}]}' > ${{ env.IMAGE_NAME }}_result.json
        
         
     - id: 'upload-file'
