@@ -69,11 +69,15 @@ jobs:
         image-ref: 'gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
         format: json
         exit-code: 0
-        output: '${{ env.IMAGE_NAME }}_report'
+        output: '${{ env.IMAGE_NAME }}_report.json'
+        
+    - name: report_processing
+      run: |
+        cat ${{ env.IMAGE_NAME }}_report.json | jq '.Results[] | {Type, Class, Target, Vulnerabilities: [.Vulnerabilities[] | {PkgName, VulnerabilityID, Severity, InstalledVersion, FixedVersion, Title, PrimaryURL}]}' > ${{ env.IMAGE_NAME }}_result.json
        
         
     - id: 'upload-file'
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: '${{ env.IMAGE_NAME }}_report'
+        path: '${{ env.IMAGE_NAME }}_result.json'
         destination: 'test-trivy-01/230427'
