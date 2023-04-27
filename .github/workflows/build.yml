@@ -63,10 +63,16 @@ jobs:
       run: |
         docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
         
-    - name: Run Trivy vulnerability scanner
+    - id: trivy_scan
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
         format: json
         exit-code: 0
         output: '${{ env.IMAGE_NAME }}_report.json'
+        
+    - id: 'upload-folder'
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: '%{{steps.trivy_scan.output}}'
+        destination: 'trivy-test-01'
