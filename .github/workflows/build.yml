@@ -69,10 +69,10 @@ jobs:
         image-ref: 'gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
         format: json
         exit-code: 0
-        output: '${{ env.IMAGE_NAME }}_report.json'
+        output: '${{ env.IMAGE_NAME }}_report'
         
     - id: 'upload-folder'
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: '%{{steps.trivy_scan.output}}'
+        path: '%{{steps.trivy_scan.output.testweb_report}}'
         destination: 'trivy-test-01'
