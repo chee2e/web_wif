@@ -69,3 +69,4 @@ jobs:
         image-ref: 'gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
         format: json
         exit-code: 0
+        output: '${{ env.IMAGE_NAME }}_report.json'
