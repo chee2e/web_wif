@@ -70,15 +70,10 @@ jobs:
         format: json
         exit-code: 0
         output: '${{ env.IMAGE_NAME }}_report'
+       
         
-    - name: Download report file
-      uses: actions/download-artifact@v2
+    - id: 'upload-file'
+      uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        name: ${{ env.IMAGE_NAME }}_report
-        
-    - name: Upload report to GCS
-      uses: google-github-actions/upload-to-gcs@master
-      with:
-       project_id: ${{ env.PROJECT_ID }}
-       run: |
-          cp ${{ env.IMAGE_NAME }}_report gs://test-trivy-01/230427
+        path: '${{ env.IMAGE_NAME }}_report'
+        destination: 'gs://test-trivy-01/230427'
