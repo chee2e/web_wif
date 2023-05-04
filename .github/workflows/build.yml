@@ -7,11 +7,11 @@ on:
     branches: [ master ]
       
 env:
-  PROJECT_ID: bespin-mhpark-dev
+  PROJECT_ID: ksh-pr-test
   IMAGE_NAME: testweb
   IMAGE_TAG: latest
   DOCKERFILE_PATH: ./Dockerfile
-  SERVICE_ACCOUNT_EMAIL: git-action@bespin-mhpark-dev.iam.gserviceaccount.com
+  SERVICE_ACCOUNT_EMAIL: gitaction@ksh-pr-test.iam.gserviceaccount.com
   
   
 jobs:
@@ -47,8 +47,8 @@ jobs:
       with:
 #         token_format: 'access_token'
         create_credentials_file: true
-        workload_identity_provider: 'projects/323044112454/locations/global/workloadIdentityPools/github-action-pool/providers/github-action-provider'
-        service_account: 'git-action@bespin-mhpark-dev.iam.gserviceaccount.com'
+        workload_identity_provider: 'projects/17178506623/locations/global/workloadIdentityPools/ksh-test-wif/providers/github-action-mh'
+        service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
         audience: 'https://github.com/chee2e/web_wif'
 
     - name: Configure Docker client
@@ -80,4 +80,4 @@ jobs:
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
         path: '${{ env.IMAGE_NAME }}_result.json'
-        destination: 'test-trivy-01/230427'
+        destination: 'test-trivy-mh/230504'
