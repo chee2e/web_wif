@@ -71,4 +71,4 @@ jobs:
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
         path: '${{ env.IMAGE_NAME }}_result.json'
-        destination: 'test-trivy-mh/230504'
+        destination: ${{ secrets.GCS_BUCKET_PATH }}
