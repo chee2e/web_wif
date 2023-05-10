@@ -7,11 +7,10 @@ on:
     branches: [ master ]
       
 env:
-  PROJECT_ID: ksh-pr-test
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
   IMAGE_NAME: testweb
   IMAGE_TAG: latest
   DOCKERFILE_PATH: ./Dockerfile
-  SERVICE_ACCOUNT_EMAIL: gitaction@ksh-pr-test.iam.gserviceaccount.com
   
   
 jobs:
@@ -25,30 +24,25 @@ jobs:
     steps:
     - name: Checkout source code
       uses: 'actions/checkout@v3'
-      
-#     - name: Login to Docker Hub
-#       uses: docker/login-action@v1
-#       with:
-#         username: ${{ secrets.DOCKER_USERNAME }}
-#         password: ${{ secrets.DOCKER_PASSWORD }}
-
-        
+    
+    # 1. Docker Image Build
     - name: Build Docker image
       env:
         PROJECT_ID: ${{ env.PROJECT_ID }}
         IMAGE_NAME: ${{ env.IMAGE_NAME }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
-        docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+        docker build -t gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
         
-    - id: 'auth'
-      name: 'Authenticate to Google Cloud'
+    # 2. WIF 적용 & Image Push (GCR)
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1.1.1
+      
+    - name: Auth with OIDC
       uses: 'google-github-actions/auth@v1'
       with:
-#         token_format: 'access_token'
-        create_credentials_file: true
-        workload_identity_provider: 'projects/17178506623/locations/global/workloadIdentityPools/ksh-test-wif/providers/github-action-mh'
-        service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
+        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
         audience: 'https://github.com/chee2e/web_wif'
 
     - name: Configure Docker client
@@ -56,17 +50,14 @@ jobs:
         gcloud auth configure-docker -q
         
     - name: Push Docker image
-      env:
-        PROJECT_ID: ${{ env.PROJECT_ID }}
-        IMAGE_NAME: ${{ env.IMAGE_NAME }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
-        docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-        
+        docker push gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+    
+    # 3. Trivy Scan         
     - id: trivy_scan
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: 'gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
+        image-ref: 'gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
         format: json
         exit-code: 0
         output: '${{ env.IMAGE_NAME }}_report.json'
@@ -75,7 +66,7 @@ jobs:
       run: |
         cat ${{ env.IMAGE_NAME }}_report.json | jq -c '.Results[] | {Type, Class, Target, Vulnerabilities: [.Vulnerabilities[] | {PkgName, VulnerabilityID, Severity, InstalledVersion, FixedVersion, Title, PrimaryURL}]}' > ${{ env.IMAGE_NAME }}_result.json
        
-        
+    # 4. Upload GCS   
     - id: 'upload-file'
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
