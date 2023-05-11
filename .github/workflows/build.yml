@@ -38,6 +38,7 @@ jobs:
       name: Auth with OIDC
       uses: 'google-github-actions/auth@v1'
       with:
+        token_format: 'access_token'
         workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
         audience: 'https://github.com/chee2e/web_wif'
