@@ -27,10 +27,6 @@ jobs:
     
     # 1. Docker Image Build
     - name: Build Docker image
-      env:
-        PROJECT_ID: ${{ env.PROJECT_ID }}
-        IMAGE_NAME: ${{ env.IMAGE_NAME }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
       run: |
         docker build -t gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
         
@@ -66,9 +62,21 @@ jobs:
       run: |
         cat ${{ env.IMAGE_NAME }}_report.json | jq -c '.Results[] | {Type, Class, Target, Vulnerabilities: [.Vulnerabilities[] | {PkgName, VulnerabilityID, Severity, InstalledVersion, FixedVersion, Title, PrimaryURL}]}' > ${{ env.IMAGE_NAME }}_result.json
        
-    # 4. Upload GCS   
-    - id: 'upload-file'
-      uses: 'google-github-actions/upload-cloud-storage@v1'
-      with:
-        path: '${{ env.IMAGE_NAME }}_result.json'
-        destination: ${{ secrets.GCS_BUCKET_PATH }}
+#     # 4. Upload GCS   
+#     - id: 'upload-file'
+#       uses: 'google-github-actions/upload-cloud-storage@v1'
+#       with:
+#         path: '${{ env.IMAGE_NAME }}_result.json'
+#         destination: ${{ secrets.GCS_BUCKET_PATH }}
+
+    # 4. Upload BQ table
+    - name: Load JSON into BigQuery
+      env:
+        DATA_SET: trivy_test
+        TABLE_NAME: trivy_result_$GITHUB_SHA
+      run: |
+       bq --location=asia-northeast3 load \
+       --autodetect \
+       --source_format=NEWLINE_DELIMITED_JSON \
+       ${{ secrets.PROJECT_ID }}:${{ env.DATA_SET }}.${{ env.TABLE_NAME }} \
+        ${{ env.IMAGE_NAME }}_result.json
