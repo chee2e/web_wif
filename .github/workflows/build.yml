@@ -73,7 +73,9 @@ jobs:
 
     - name: Authenticate with gcloud
       run: |
-        gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT_EMAIL }} --key-file=${{ steps.google-auth.outputs.access_token }}
+        echo ${{ steps.google-auth.outputs.access_token }} > key.json
+        gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT_EMAIL }} --key-file=key.json
+        rm key.json
 
     # 4. Upload BQ table
     - name: Load JSON into BigQuery
