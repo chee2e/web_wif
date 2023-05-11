@@ -69,6 +69,10 @@ jobs:
 #         path: '${{ env.IMAGE_NAME }}_result.json'
 #         destination: ${{ secrets.GCS_BUCKET_PATH }}
 
+    - name: Authenticate with gcloud
+      run: |
+        gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+
     # 4. Upload BQ table
     - name: Load JSON into BigQuery
       env:
