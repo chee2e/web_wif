@@ -82,3 +82,44 @@ jobs:
        --source_format=NEWLINE_DELIMITED_JSON \
        ${{ secrets.PROJECT_ID }}:${{ env.DATA_SET }}.${{ env.TABLE_NAME }} \
         ${{ env.IMAGE_NAME }}_result.json
+        
+    - name: Run BigQuery query
+      run: |
+        bq query --use_legacy_sql=false --format=json "
+        SELECT
+          Target,
+          Class,
+          Type,
+          PrimaryURL,
+          Title,
+          InstalledVersion,
+          Severity,
+          VulnerabilityID,
+          FixedVersion,
+          PkgName
+         FROM
+          trivy_test.trivy_result_$GITHUB_SHA,
+          UNNEST(result_test_v3.Vulnerabilities)
+        "
+        
+    - name: Save query results
+      env:
+        DATA_SET: trivy_test
+        TABLE_NAME: trivy_result_$GITHUB_SHA
+      run: |
+          bq query --use_legacy_sql=false --format=json --destination_table ${{ secrets.PROJECT_ID }}:${{ env.DATA_SET }}.${{ env.TABLE_NAME }} --replace "
+          SELECT
+            Target,
+            Class,
+            Type,
+            PrimaryURL,
+            Title,
+            InstalledVersion,
+            Severity,
+            VulnerabilityID,
+            FixedVersion,
+            PkgName
+          FROM
+            trivy_test.trivy_result_$GITHUB_SHA,
+            UNNEST(result_test_v3.Vulnerabilities)
+          "
