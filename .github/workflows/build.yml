@@ -121,5 +121,5 @@ jobs:
             PkgName
           FROM
             trivy_test.trivy_result_$GITHUB_SHA,
-            UNNEST(result_test_v3.Vulnerabilities)
+            UNNEST(trivy_result_$GITHUB_SHA.Vulnerabilities)
           "
