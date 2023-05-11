@@ -34,7 +34,8 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1.1.1
       
-    - name: Auth with OIDC
+    - id: google-auth
+      name: Auth with OIDC
       uses: 'google-github-actions/auth@v1'
       with:
         workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
@@ -50,7 +51,7 @@ jobs:
         docker push gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
     
     # 3. Trivy Scan         
-    - id: trivy_scan
+    - name: trivy_scan
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}'
@@ -71,7 +72,7 @@ jobs:
 
     - name: Authenticate with gcloud
       run: |
-        gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+        gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT_EMAIL }} --key-file=${{ steps.google-auth.outputs.credentials_file }}
 
     # 4. Upload BQ table
     - name: Load JSON into BigQuery
