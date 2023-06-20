@@ -26,9 +26,9 @@ jobs:
       uses: 'actions/checkout@v3'
     
     # 1. Docker Image Build
-    - name: Build Docker image
-      run: |
-        docker build -t gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+#     - name: Build Docker image
+#       run: |
+#         docker build -t gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
         
     # 2. WIF 적용 & Image Push (GCR)
     
@@ -37,7 +37,7 @@ jobs:
       uses: 'google-github-actions/auth@v1'
       with:
         token_format: 'access_token'
-        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+        workload_identity_provider: projects/195937949357/locations/global/workloadIdentityPools/github-actions/providers/dqa-d-ingest-cd-provider
         service_account: 'dqa-d-sc-ingest-cd-github@symbolic-object-383000.iam.gserviceaccount.com'
         audience: 'https://github.com/chee2e/web_wif'
         
