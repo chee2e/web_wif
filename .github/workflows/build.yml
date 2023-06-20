@@ -31,6 +31,9 @@ jobs:
         docker build -t gcr.io/${{ secrets.PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
         
     # 2. WIF 적용 & Image Push (GCR)
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1.1.1
+    
     - id: google-auth
       name: Auth with OIDC
       uses: 'google-github-actions/auth@v1'
@@ -41,8 +44,6 @@ jobs:
         #service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
         audience: 'https://github.com/chee2e/web_wif'
     
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1.1.1
 
     - name: Configure Docker client
       run: |
