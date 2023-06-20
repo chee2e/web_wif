@@ -12,6 +12,7 @@ env:
   IMAGE_TAG: latest
   DOCKERFILE_PATH: ./Dockerfile
   GAR_LOCATION: asia-northeast3
+  REPOSITORY: trivy-repo
   
   
 jobs:
